@@ -1,0 +1,32 @@
+apply plugin: 'java'
+apply plugin: 'eclipse'
+
+project.repositories {
+  ivy {
+    url "http://repo.pentaho.org/artifactory/repo/"
+    layout  "pattern", {
+      ivy "[organisation]/[module]/[revision]/[module]-[revision].ivy.xml"
+      artifact "[organisation]/[module]/[revision]/[module]-[revision].jar"
+      m2compatible = true
+    }
+  }
+  maven {
+    url 'http://repo.pentaho.org/artifactory/repo'
+  }
+  mavenCentral()
+}
+
+dependencies {
+  compile('pentaho-kettle:kettle-core:5.0.0+@jar')
+}
+
+
+task plugin(dependsOn:jar, type: Zip) {
+  into('ValueMetaMap/') {
+    from jar.outputs.files
+  }  
+}
+
+task createGradleWrapper(type: Wrapper) {
+  gradleVersion = '1.1'
+}
