@@ -28,5 +28,5 @@ task plugin(dependsOn:jar, type: Zip) {
 }
 
 task createGradleWrapper(type: Wrapper) {
-  gradleVersion = '1.1'
+  gradleVersion = '1.7'
 }
