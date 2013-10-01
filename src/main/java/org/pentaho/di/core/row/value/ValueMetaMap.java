@@ -6,11 +6,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.pentaho.di.core.Const;
+import org.pentaho.di.core.exception.KettlePluginException;
 import org.pentaho.di.core.exception.KettleValueException;
 import org.pentaho.di.core.row.ValueMetaInterface;
 
 @ValueMetaPlugin(id="627", name="Map", description="A collection of key/value pairs")
-public class ValueMetaMap extends ValueMetaBase {
+public class ValueMetaMap extends ValueMetaBase implements Cloneable {
+  
+  ValueMetaInterface keyMeta;
+  ValueMetaInterface valueMeta;
   
   public static final int TYPE_MAP = 627;  // Value is "MAP" on a phone keypad
   
@@ -21,7 +25,43 @@ public class ValueMetaMap extends ValueMetaBase {
   public ValueMetaMap(String name) {
     super(name, TYPE_MAP);
   }
+  
+  public ValueMetaMap(String name, ValueMetaInterface keyMeta, ValueMetaInterface valueMeta) {
+    this(name);
+    this.keyMeta = keyMeta;
+    this.valueMeta = valueMeta;
+  }
+  
+  @Override
+  public ValueMetaMap clone() {
+    ValueMetaMap mapMeta = (ValueMetaMap) super.clone();
+    try {
+      mapMeta.keyMeta = ValueMetaFactory.cloneValueMeta(keyMeta);
+      mapMeta.valueMeta = ValueMetaFactory.cloneValueMeta(valueMeta);
+    } catch (KettlePluginException e) {
+      // TODO: log/print error, throw runtime exception?
+    }
     
+    mapMeta.compareStorageAndActualFormat();
+
+    return mapMeta;
+    
+  }
+  
+  @Override
+  public Object cloneValueData(Object object) throws KettleValueException {
+    Map<Object,Object> map = getMap(object);
+    if (map == null) return null;
+
+    try {
+      Map<Object,Object> mapClone = new HashMap<Object,Object>(map.size());
+      mapClone.putAll(map);      
+      return mapClone;
+      
+    } catch(Exception e) {
+      throw new KettleValueException("Unable to clone Map", e);
+    }
+  }
   
   @Override
   public String getString(Object object) throws KettleValueException {
@@ -132,13 +172,29 @@ public class ValueMetaMap extends ValueMetaBase {
       keyValuePairs = keyValuePairs.substring(1,keyValuePairs.length()-1);
     }
     
-    String[] kvPairList = Const.splitString(object, ",","\"");
+    String[] kvPairList = Const.splitString(keyValuePairs, ",","\"");
     for(String kvPairString : kvPairList) {
       String[] kvPair = Const.splitString(kvPairString, "=","\"");
       map.put(kvPair[0].trim(), kvPair[1].trim());
     }
     
     return map;
+  }
+
+  public ValueMetaInterface getKeyMeta() {
+    return keyMeta;
+  }
+
+  public void setKeyMeta(ValueMetaInterface keyMeta) {
+    this.keyMeta = keyMeta;
+  }
+
+  public ValueMetaInterface getValueMeta() {
+    return valueMeta;
+  }
+
+  public void setValueMeta(ValueMetaInterface valueMeta) {
+    this.valueMeta = valueMeta;
   }
 
 }

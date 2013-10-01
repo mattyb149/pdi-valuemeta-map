@@ -1,6 +1,8 @@
 apply plugin: 'java'
 apply plugin: 'eclipse'
 
+project.ext.kettle_dependency_revision = 'TRUNK-SNAPSHOT'
+
 project.repositories {
   ivy {
     url "http://repo.pentaho.org/artifactory/repo/"
@@ -17,12 +19,15 @@ project.repositories {
 }
 
 dependencies {
-  compile('pentaho-kettle:kettle-core:5.0.0+@jar')
+  compile("pentaho-kettle:kettle-core:${project.ext.kettle_dependency_revision}")
+  compile("pentaho-kettle:kettle-engine:${project.ext.kettle_dependency_revision}")
+  compile("pentaho-kettle:kettle-ui-swt:${project.ext.kettle_dependency_revision}")
+  //compile('org.eclipse.swt:swt-linux-x86_64:3.7 />')
 }
 
 
 task plugin(dependsOn:jar, type: Zip) {
-  into('ValueMetaMap/') {
+  into('KeyValuePlugin/') {
     from jar.outputs.files
   }  
 }
