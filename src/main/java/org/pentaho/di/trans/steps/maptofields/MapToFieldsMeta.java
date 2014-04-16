@@ -61,7 +61,7 @@ import org.w3c.dom.Node;
  */
 @Step(
     id = "MapToFields", 
-    image = "fields-to-map.png",
+    image = "map-to-fields.png",
     name = "Map To Fields", 
     description = "Combines key/value field pairs into a single Map", 
     categoryDescription = "Transform")

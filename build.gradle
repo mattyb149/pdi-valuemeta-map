@@ -1,7 +1,7 @@
 apply plugin: 'java'
 apply plugin: 'eclipse'
 
-project.ext.kettle_dependency_revision = 'TRUNK-SNAPSHOT'
+project.ext.kettle_dependency_revision = '5.0+'
 
 project.repositories {
   ivy {
@@ -16,20 +16,37 @@ project.repositories {
     url 'http://repo.pentaho.org/artifactory/repo'
   }
   mavenCentral()
+  mavenLocal()
+}
+
+configurations {
+  runtimeWithoutCompile {
+    transitive = false
+  }
+  zip
 }
 
 dependencies {
   compile("pentaho-kettle:kettle-core:${project.ext.kettle_dependency_revision}")
   compile("pentaho-kettle:kettle-engine:${project.ext.kettle_dependency_revision}")
-  compile("pentaho-kettle:kettle-ui-swt:${project.ext.kettle_dependency_revision}")
-  //compile('org.eclipse.swt:swt-linux-x86_64:3.7 />')
+  compile("pentaho-kettle:kettle-ui-swt:${project.ext.kettle_dependency_revision}") {
+    exclude module:'jface'
+  }
 }
 
 
 task plugin(dependsOn:jar, type: Zip) {
-  into('KeyValuePlugin/') {
+  into("${project.name}/") {
     from jar.outputs.files
-  }  
+    from fileTree(dir: 'package-res')
+  }
+  into("${project.name}/lib") {
+    from configurations.runtimeWithoutCompile
+  } 
+}
+
+artifacts {
+  zip plugin
 }
 
 task createGradleWrapper(type: Wrapper) {
